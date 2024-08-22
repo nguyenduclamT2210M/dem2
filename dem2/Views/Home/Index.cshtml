@@ -1,0 +1,19 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+@{
+    var userName = TempData["UserName"] as string;
+}
+
+@if (!string.IsNullOrEmpty(userName))
+{
+    <p>Welcome, @userName!</p>
+}
+else
+{
+    <p>Welcome, Guest!</p>
+}
