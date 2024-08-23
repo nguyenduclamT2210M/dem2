@@ -1,23 +1,20 @@
-﻿using dem2.Models;
+﻿using dem2.hhh;
+using dem2.Models;
 using dem2.Service;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-
-using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http;
-using System.Text;
-
+using reCAPTCHA.AspNetCore;
 namespace dem2.Controllers
 {
     public class AuthController : Controller
     {
         private readonly ApiService _authService;
         private readonly HttpClient _httpClient;
-
-        public AuthController()
+        private readonly IConfiguration _configuration;
+        public AuthController(IConfiguration configuration)
         {
             _authService = new ApiService();
             _httpClient = new HttpClient();
+            _configuration = configuration;
         }
 
         // GET: Account/Login
@@ -35,6 +32,20 @@ namespace dem2.Controllers
             {
                 try
                 {
+                    var secretKey = _configuration["ReCaptchaSetting:SecretKey"];
+                    var reCaptchaHelper = new GoogleReCaptchaHelper(secretKey);
+                    var captchaToken = Request.Form["g-recaptcha-response"];
+                    var captchaResult = await reCaptchaHelper.ValidateCaptchaAsync(captchaToken);
+
+                    if (!captchaResult)
+                    {
+                        ModelState.AddModelError("", "CAPTCHA không hợp lệ. Vui lòng thử lại.");
+                        return View(model);
+                    }
+
+
+
+
                     // Lấy token từ dịch vụ xác thực
                     var token = await _authService.LoginAsync(model);
 
